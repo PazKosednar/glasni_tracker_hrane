@@ -21,10 +21,14 @@ seznam_zivil = {
     }
 }
 
+seznam_kolicin = {"enkrat": 1, "dvakrat": 2,
+                  "trikrat": 3, "štirikrat": 4, "petkrat": 5, "ena": 1, "dva": 2, "tri": 3, "štiri": 4, "pet": 5}
+
 
 def main():
 
     while True:
+        print("Povej hrano katero želiš vnesti(npr. )")
         input("⏎ ENTER za začetek poslušanja...")
 
         spoken_text = poslusaj()
@@ -39,8 +43,8 @@ def main():
         zivilo = seznam_zivil.get(hrana)
 
         faktor = 1
-        if kolicina == "dvakrat":
-            faktor = 2
+        if kolicina in seznam_kolicin:
+            faktor = seznam_kolicin[kolicina]
 
         if hrana in seznam_zivil:
             print("=" * 35)
