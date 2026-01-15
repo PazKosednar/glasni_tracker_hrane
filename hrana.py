@@ -1,42 +1,32 @@
 import speech_recognition as sr
+import json
+from pathlib import Path
 
-seznam_zivil = {
-    "toast": {
-        "kcal": 61,
-        "beljakovine": 2.3,
-        "ogljikovi_hidrati": 11.4,
-        "maščobe": 1.0
-    },
-    "jajca": {
-        "kcal": 77,
-        "beljakovine": 6.3,
-        "ogljikovi_hidrati": 0.6,
-        "maščobe": 5.3
-    },
-    "banana": {
-        "kcal": 105,
-        "beljakovine": 1.3,
-        "ogljikovi_hidrati": 27,
-        "maščobe": 0.4
-    }
-}
+ZIVILA_PATH = Path("zivila.json")
 
 seznam_kolicin = {"enkrat": 1, "dvakrat": 2,
                   "trikrat": 3, "štirikrat": 4, "petkrat": 5, "ena": 1, "dva": 2, "tri": 3, "štiri": 4, "pet": 5}
 
 
 def main():
+    seznam_zivil = nalozi_zivila()
 
     while True:
-        print("Povej hrano katero želiš vnesti(npr. )")
+        print("== Povej hrano katero želiš vnesti(npr. dvakrat banana) ==")
         input("⏎ ENTER za začetek poslušanja...")
 
         spoken_text = poslusaj()
-        kolicina, hrana = spoken_text.split(" ")
 
         if spoken_text is None:
             print("Nič ni bilo prepoznano")
+            print("=" * 35)
             continue
+
+        if "izhod" in spoken_text.lower():
+            print(f"Adijo! Se vidimo!")
+            break
+
+        kolicina, hrana = spoken_text.split(" ")
 
         print("Uporabnik je rekel:", spoken_text.capitalize())
 
@@ -48,17 +38,9 @@ def main():
 
         if hrana in seznam_zivil:
             print("=" * 35)
-            print(f"{spoken_text.capitalize()} dodan/a v jedilnik.")
-            print(f"{zivilo['kcal'] * faktor} kalorij")
-            print(f"{zivilo['beljakovine'] * faktor} beljakovin")
-            print(
-                f"{zivilo['ogljikovi_hidrati'] * faktor} ogljikovih hidratov")
-            print(f"{zivilo['maščobe'] * faktor} maščob")
+            print(f"{hrana.capitalize()} dodan/a v jedilnik.")
+            izpis_makro(zivilo, faktor)
             print("=" * 35)
-
-        elif "izhod" in spoken_text.lower():
-            print(f"Adijo")
-            break
 
         else:
             print("Ni v seznamu živil!")
@@ -80,6 +62,26 @@ def poslusaj(language="sl-SI"):
         return text
     except:
         return None
+
+
+def izpis_makro(zivilo, faktor):
+    print(f"{zivilo['kcal'] * faktor} kalorij")
+    print(f"{zivilo['beljakovine'] * faktor} beljakovin")
+    print(
+        f"{zivilo['ogljikovi_hidrati'] * faktor} ogljikovih hidratov")
+    print(f"{zivilo['maščobe'] * faktor} maščob")
+
+
+def nalozi_zivila(path: Path = ZIVILA_PATH) -> dict:
+    if not path.exists():
+        path.write_text("{}", encoding="utf-8")
+        return {}
+
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        print("Napaka: zivila.json ni veljaven JSON")
+        return {}
 
 
 if __name__ == "__main__":
